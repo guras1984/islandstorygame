@@ -20,6 +20,17 @@ ctx.touch1=touch(101,100,100);ctx.touch2=touch(102,200,100);ctx.touch2wide=touch
 run('renderer.domElement.onpointerdown(touch1);renderer.domElement.onpointerdown(touch2);renderer.domElement.onpointermove(touch2wide)');assert.equal(run('zoom'),10);assert.equal(run('yaw'),initialYaw);assert.equal(run('moveTarget'),null);
 run('renderer.domElement.onpointerup(touch2wide);renderer.domElement.onpointermove({...touch1,clientX:160});renderer.domElement.onpointerup({...touch1,clientX:160})');assert.equal(run('yaw'),initialYaw);assert.equal(run('moveTarget'),null);assert.equal(run('gesturePointers.size'),0);
 run('setZoom(.1)');assert.equal(run('zoom'),4.5);run('setZoom(200)');assert.equal(run('zoom'),80);run('zoom=25;renderer.domElement.onwheel({deltaY:-100,preventDefault(){}})');assert.ok(run('zoom')<25);
+// Floating touch stick appears only during a deliberate drag, never rotates the camera.
+run('resetGesture();clearKeys();cancelMove();player.position.set(0,.45,0)');
+ctx.stickDown=touch(201,100,550);ctx.stickMove=touch(201,143,550);
+run('renderer.domElement.onpointerdown(stickDown)');assert.equal(node('#floatingJoystick').hidden,true);
+const stickYaw=run('yaw');run('renderer.domElement.onpointermove({...stickDown,clientX:106.5})');assert.equal(run('yaw'),stickYaw);
+run('renderer.domElement.onpointermove(stickMove)');assert.equal(node('#floatingJoystick').hidden,false);assert.equal(run('joystick.active'),true);
+const stickPosition=run('player.position.clone()');run('update(.2)');assert.ok(stickPosition.distanceTo(run('player.position.clone()'))>.7);assert.equal(run('yaw'),stickYaw);
+run('renderer.domElement.onpointerup(stickMove)');assert.equal(node('#floatingJoystick').hidden,true);assert.equal(run('moveTarget'),null);
+const releasedPosition=run('player.position.clone()');run('update(.2)');assert.ok(releasedPosition.distanceTo(run('player.position.clone()'))<.001);
+run('renderer.domElement.onpointerdown(stickDown);renderer.domElement.onpointermove(stickMove);renderer.domElement.onpointerdown(touch2)');assert.equal(node('#floatingJoystick').hidden,true);assert.equal(run('joystick'),null);
+run('renderer.domElement.onpointerup(touch2);renderer.domElement.onpointerup(stickMove)');assert.equal(run('moveTarget'),null);
 // Compact rows defer all descriptions to one native details dialog.
 const row=run('buildingCard(defs.find(d=>d.id==="habitat"))');assert.ok(!row.includes('토끼가 안심'));assert.ok(row.includes('자세히'));assert.ok(run('compactPanel()').includes('앞으로 열릴 건물'));
 run('showDetails("building","habitat")');assert.ok(node('#detailBody').innerHTML.includes('토끼가 안심'));assert.equal(node('#detailDialog').open,true);node('#detailDialog').close();
@@ -29,6 +40,11 @@ run('animateHuman(player,.1,.4)');assert.ok(run('player.userData.rig.leftLeg.rot
 run('clearKeys();player.position.set(0,.45,0);setMoveTarget(new THREE.Vector3(4,0,3))');for(let i=0;i<100;i++)run('update(.03)');assert.ok(run('Math.hypot(player.position.x-4,player.position.z-3)')<.04);assert.equal(run('moveTarget'),null);assert.equal(run('setMoveTarget(new THREE.Vector3(30,0,0))'),false);
 run('setMoveTarget(new THREE.Vector3(-4,0,0))');emit('keydown',{code:'KeyD',key:'ㅇ',preventDefault(){}});assert.equal(run('moveTarget'),null);emit('keyup',{code:'KeyD'});
 run('setMoveTarget(new THREE.Vector3(2,0,2));renderer.domElement.onpointerdown({button:0,clientX:100,clientY:100,pointerId:1});renderer.domElement.onpointermove({clientX:125,clientY:100,pointerId:1});renderer.domElement.onpointerup({clientX:125,clientY:100,pointerId:1});');assert.equal(run('moveTarget'),null);
+// Selecting a resource walks into range and harvests only once.
+run('cancelMove();player.position.set(0,.45,0);harvestCD=0;resources[0].cool=0');const gatherBefore=run('s[resources[0].type]');
+run('activateTarget({kind:"resource",ref:resources[0]})');assert.equal(node('#contextActions').hidden,true);
+for(let i=0;i<600;i++)run('update(.03)');assert.equal(run('s[resources[0].type]'),gatherBefore+run('resources[0].type==="wood"?4:3'));assert.equal(run('pendingAction'),null);
+assert.ok(run('menuBounds(389,840,162,190,390,844).left')<=218);assert.ok(run('menuBounds(0,0,162,190,390,844).top')>=10);
 // Construction previews never spend, cancellation is reversible, upgrades gate progression.
 run('s.wood=100000;s.stone=100000;s.food=100000;s.gold=100000;s.crystal=100;');const wood=run('s.wood');run('build("habitat")');assert.ok(run('placement'));assert.equal(run('s.wood'),wood);const previewPos=run('({x:placement.x,z:placement.z})');run('renderer.domElement.onpointerdown(touch1);renderer.domElement.onpointerdown(touch2);renderer.domElement.onpointermove(touch2wide);renderer.domElement.onpointerup(touch2wide);renderer.domElement.onpointerup(touch1)');assert.equal(run('placement.x'),previewPos.x);assert.equal(run('placement.z'),previewPos.z);run('cancelPlacement()');assert.equal(run('s.wood'),wood);
 function findSpot(id,skip=null){return run(`(()=>{const d=defs.find(d=>d.id===${JSON.stringify(id)});const pts=[];for(let x=-21;x<=21;x+=1.5)for(let z=-21;z<=21;z+=1.5)if(validPlacement(d.id,x,z,${JSON.stringify(skip)}))pts.push({x,z,dist:Math.hypot(x-d.origin[0],z-d.origin[1])});pts.sort((a,b)=>a.dist-b.dist);return pts[0]})()`);}
@@ -40,6 +56,7 @@ for(const id of ['habitat','orchard','pond','farm','house','lumber','quarry','st
  if(id==='house'){assert.equal(run('crew()'),0);assert.ok(run('s.visitor'));run('talkTo(visitorMesh);skipDialogue()');assert.equal(run('crew()'),0);assert.ok(run('dialogue.choices.length')===2);run('chooseDialogue(0)');assert.equal(run('crew()'),1);assert.equal(run('capacity(s)'),4);}
 }
 assert.equal(run('voyageUnlocked()'),true);assert.equal(run('validPlacement("house",0,0,"habitat")&&validPlacement("house",100,0)'),false);
+run('activateTarget({kind:"building",id:"house"})');assert.ok(node('#contextChoices').innerHTML.includes('업그레이드'));run('cancelMove()');assert.equal(node('#contextActions').hidden,true);
 // More homes expand capacity, visitors need explicit consent, resident assignments persist.
 const count=run('crew()'),cap=run('capacity(s)');run('startPlacement("house","extra")');const homeSpot=findSpot('house');assert.ok(homeSpot);run(`placement.x=${homeSpot.x};placement.z=${homeSpot.z};commitPlacement()`);assert.equal(run('capacity(s)'),cap+2);assert.equal(run('crew()'),count);run('talkTo(visitorMesh);skipDialogue();chooseDialogue(1)');assert.equal(run('crew()'),count);run('maybeVisitor(45);acceptVisitor()');assert.equal(run('crew()'),count+1);run('assignResident(s.residents[0].id,"wood")');assert.equal(run('s.jobs.wood'),1);let before=run('s.wood');run('produce()');assert.ok(run('s.wood')>before);
 // Relocation and heading are persisted without spending resources.

@@ -20,6 +20,10 @@ ctx.touch1=touch(101,100,100);ctx.touch2=touch(102,200,100);ctx.touch2wide=touch
 run('renderer.domElement.onpointerdown(touch1);renderer.domElement.onpointerdown(touch2);renderer.domElement.onpointermove(touch2wide)');assert.equal(run('zoom'),10);assert.equal(run('yaw'),initialYaw);assert.equal(run('moveTarget'),null);
 run('renderer.domElement.onpointerup(touch2wide);renderer.domElement.onpointermove({...touch1,clientX:160});renderer.domElement.onpointerup({...touch1,clientX:160})');assert.equal(run('yaw'),initialYaw);assert.equal(run('moveTarget'),null);assert.equal(run('gesturePointers.size'),0);
 run('setZoom(.1)');assert.equal(run('zoom'),4.5);run('setZoom(200)');assert.equal(run('zoom'),80);run('zoom=25;renderer.domElement.onwheel({deltaY:-100,preventDefault(){}})');assert.ok(run('zoom')<25);
+// HUD folding is independent, persisted separately from progress, and closes an open management panel.
+run('toggleHud("quest")');assert.equal(run('hudFolded.quest'),true);assert.equal(JSON.parse(memory.get('isletopia-hud-v1')).quest,true);
+run('toggleHud("resources");toggleHud("quest")');assert.equal(run('hudFolded.resources'),true);assert.equal(run('hudFolded.quest'),false);
+run('panelOpen=true;toggleHud("nav")');assert.equal(run('panelOpen'),false);assert.equal(run('hudFolded.nav'),true);run('toggleHud("nav");toggleHud("resources")');
 // Floating touch stick appears only during a deliberate drag, never rotates the camera.
 run('resetGesture();clearKeys();cancelMove();player.position.set(0,.45,0)');
 ctx.stickDown=touch(201,100,550);ctx.stickMove=touch(201,143,550);

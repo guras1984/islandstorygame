@@ -3,7 +3,7 @@ import {createHero,HEROES,SHIRTS,HATS} from './character.js';
 import {BUILDINGS,PROFILES,EVENT_DEFS,normalize,level,capacity,requirements,upgradeCost} from './progression.js';
 const $=s=>document.querySelector(s), SAVE='island-nation-v1';
 const initial=()=>normalize();
-let s=initial();try{const raw=JSON.parse(localStorage.getItem(SAVE));if(raw&&raw.buildings)s=normalize(raw);}catch{}let tab='build',sea=false,toastTimer,muted=true,audio,elapsed=0,workTick=0,saveTick=0,attackCD=0,hp=100,yaw=.65,zoom=25,drag=false,lastX=0,clock=new THREE.Clock();
+let s=initial();try{const raw=JSON.parse(localStorage.getItem(SAVE));if(raw&&raw.buildings)s=normalize(raw);}catch{}let tab='build',sea=false,toastTimer,muted=true,audio,elapsed=0,workTick=0,saveTick=0,attackCD=0,hp=100,yaw=.65,zoom=innerWidth<=600?18:25,drag=false,lastX=0,clock=new THREE.Clock();
 const scene=new THREE.Scene();scene.background=new THREE.Color('#b6dfe2');scene.fog=new THREE.Fog('#b6dfe2',110,260);
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;$('#world').append(renderer.domElement);
 const camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,.1,400);const ambient=new THREE.HemisphereLight('#fff7dd','#548f9c',2.5);scene.add(ambient);const sun=new THREE.DirectionalLight('#fff1d0',3);sun.position.set(-14,27,10);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-38;sun.shadow.camera.right=38;sun.shadow.camera.top=38;sun.shadow.camera.bottom=-38;sun.shadow.normalBias=.05;scene.add(sun);
@@ -289,4 +289,11 @@ function confirmHero(){s.appearance={...avatarDraft};s.characterChosen=true;s.st
 function updateHeroPreview(dt){if(!heroPreview)return;previewTime+=dt;heroPreview.model.rotation.y=-.2+Math.sin(previewTime*.5)*.18;animateHuman(heroPreview.model,dt,0);heroPreview.renderer.render(heroPreview.scene,heroPreview.camera);}
 $('#avatarNext').onclick=()=>{avatarStep=2;paintAvatarControls();};$('#avatarBack').onclick=()=>{avatarStep=1;paintAvatarControls();};document.querySelectorAll('[data-shirt]').forEach(b=>b.onclick=()=>customizeHero('shirt',b.dataset.shirt));document.querySelectorAll('[data-hat]').forEach(b=>b.onclick=()=>customizeHero('hat',b.dataset.hat));$('#start').onclick=confirmHero;$('#welcome').oncancel=e=>{if(!s.characterChosen)e.preventDefault();};
 
+// Each HUD area has its own persistent edge tab; gameplay dialogs stay available.
+const HUD_KEY='isletopia-hud-v1';
+let hudFolded={};try{hudFolded=JSON.parse(localStorage.getItem(HUD_KEY))||{};}catch{}
+function paintHud(){for(const key of ['resources','info','quest','nav']){const folded=!!hudFolded[key];document.body.classList.toggle('folded-'+key,folded);const button=document.querySelector('[data-hud-fold="'+key+'"]');if(button){const name={resources:'자원',info:'섬 정보',quest:'목표',nav:'메뉴',location:'위치'}[key];const left=['info','quest','location'].includes(key);button.innerHTML='<span class="fold-arrow">'+(folded?(left?'›':'‹'):(left?'‹':'›'))+'</span><span class="fold-name">'+name+'</span>';button.setAttribute('aria-expanded',String(!folded));button.setAttribute('aria-label',name+(folded?' 펼치기':' 접기'));}}}
+function toggleHud(key){hudFolded[key]=!hudFolded[key];if(key==='nav'&&hudFolded[key]){panelOpen=false;render();}paintHud();try{localStorage.setItem(HUD_KEY,JSON.stringify(hudFolded));}catch{}}
+document.querySelectorAll('[data-hud-fold]').forEach(b=>b.onclick=()=>toggleHud(b.dataset.hudFold));paintHud();
+setTimeout(()=>document.body.classList.toggle('guide-done',true),12000);
 setInputMode(touchInput);islands.forEach(a=>a.g.visible=false);monsters.forEach(m=>m.g.visible=false);rebuild();render();camera.position.set(18,24,27);if(!s.started||!s.characterChosen)openAvatarEditor();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.05);if($('#welcome').open)updateHeroPreview(dt);if(!document.hidden&&!$('#welcome').open&&!$('#helpDialog').open)update(dt);renderer.render(scene,camera);}frame();

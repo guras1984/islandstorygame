@@ -20,6 +20,16 @@ ctx.touch1=touch(101,100,100);ctx.touch2=touch(102,200,100);ctx.touch2wide=touch
 run('renderer.domElement.onpointerdown(touch1);renderer.domElement.onpointerdown(touch2);renderer.domElement.onpointermove(touch2wide)');assert.equal(run('zoom'),10);assert.equal(run('yaw'),initialYaw);assert.equal(run('moveTarget'),null);
 run('renderer.domElement.onpointerup(touch2wide);renderer.domElement.onpointermove({...touch1,clientX:160});renderer.domElement.onpointerup({...touch1,clientX:160})');assert.equal(run('yaw'),initialYaw);assert.equal(run('moveTarget'),null);assert.equal(run('gesturePointers.size'),0);
 run('setZoom(.1)');assert.equal(run('zoom'),4.5);run('setZoom(200)');assert.equal(run('zoom'),80);run('zoom=25;renderer.domElement.onwheel({deltaY:-100,preventDefault(){}})');assert.ok(run('zoom')<25);
+// Portrait browsers render a landscape play surface, with touch input transformed once.
+assert.equal(run('landscapeMetrics(390,844).width'),844);assert.equal(run('landscapeMetrics(390,844).height'),390);assert.equal(run('landscapeMetrics(844,390).rotated'),false);assert.equal(run('landscapeMetrics(1280,720).mobile'),false);
+ctx.innerWidth=390;ctx.innerHeight=844;run('syncGameLayout()');assert.equal(run('portraitGame'),true);assert.equal(run('camera.aspect'),844/390);
+assert.equal(run('gamePointer({clientX:310,clientY:120}).clientX'),120);assert.equal(run('gamePointer({clientX:310,clientY:120}).clientY'),80);
+ctx.rotDown={button:0,pointerType:'touch',pointerId:501,clientX:90,clientY:100};ctx.rotMove={...ctx.rotDown,clientY:143};
+run('renderer.domElement.onpointerdown(rotDown);renderer.domElement.onpointermove(rotMove)');assert.equal(run('joystick.active'),true);assert.equal(run('joystick.dx'),1);assert.equal(run('joystick.dz'),0);
+run('renderer.domElement.onpointerup(rotMove)');assert.equal(run('joystick'),null);
+run('showReward({wood:4});showReward({wood:4,food:3})');assert.equal(run('rewardCue.items.wood'),8);assert.equal(node('#rewardPop').hidden,false);run('updateReward(2)');assert.equal(node('#rewardPop').hidden,true);
+run('showDialogue("작은 토끼",["반가워요."]);advanceDialogue()');assert.equal(node('#dialogueAvatar').textContent,'🐰');assert.equal(node('#dialogueText').textContent,'반가워요.');run('skipDialogue()');assert.equal(run('dialogue'),null);
+ctx.innerWidth=1280;ctx.innerHeight=720;run('syncGameLayout()');assert.equal(run('portraitGame'),false);assert.equal(run('viewWidth'),1280);
 // HUD folding is independent, persisted separately from progress, and closes an open management panel.
 run('toggleHud("quest")');assert.equal(run('hudFolded.quest'),true);assert.equal(JSON.parse(memory.get('isletopia-hud-v1')).quest,true);
 run('toggleHud("resources");toggleHud("quest")');assert.equal(run('hudFolded.resources'),true);assert.equal(run('hudFolded.quest'),false);

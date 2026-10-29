@@ -2,12 +2,13 @@ import * as THREE from './dist/vendor/three.module.js';
 import * as rules from './dist/progression.js';
 import * as hero from './dist/character.js';
 import * as life from './dist/life-rules.js';
+import * as navigation from './dist/navigation.js';
 import * as uiIcons from './dist/icons.js';
 import vm from 'node:vm';import fs from 'node:fs';import assert from 'node:assert/strict';
 const nodes=new Map();function node(sel){if(!nodes.has(sel))nodes.set(sel,{textContent:'',innerHTML:'',style:{setProperty(){}},open:false,hidden:false,scrollTop:0,parentElement:{scrollTop:0},classList:{toggle(key,value){this[key]=value;}},setAttribute(){},querySelectorAll(){return[]},append(){},show(){this.open=true},showModal(){this.open=true},close(){this.open=false}});return nodes.get(sel)}
 const events={},memory=new Map(),scheduled=[];const gainParam=()=>({value:0,setValueAtTime(){},linearRampToValueAtTime(){},exponentialRampToValueAtTime(){},setTargetAtTime(){}});
 class FakeAudio {constructor(){this.sampleRate=1000;this.currentTime=1;this.state='running';this.destination={};}resume(){}createGain(){return {gain:gainParam(),connect(){},disconnect(){}}}createOscillator(){return {frequency:gainParam(),connect(){},disconnect(){},start(t){scheduled.push(t)},stop(){}}}createBuffer(_,length){return {getChannelData:()=>new Float32Array(length)}}createBufferSource(){return {connect(){},start(){}}}createBiquadFilter(){return {frequency:gainParam(),connect(){}}}}
-const ctx=vm.createContext({...rules,...hero,...life,...uiIcons,THREE:{...THREE,WebGLRenderer:class{constructor(){this.shadowMap={};this.domElement={setAttribute(){},focus(){},setPointerCapture(){},getBoundingClientRect(){return {left:0,top:0,width:1280,height:720}}}}setPixelRatio(){}setSize(){}render(){}}},AudioContext:FakeAudio,document:{querySelector:node,querySelectorAll:()=>[],body:node('body'),activeElement:{tagName:'BODY'},addEventListener(){},hidden:false},innerWidth:1280,innerHeight:720,devicePixelRatio:1,localStorage:{getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v)},addEventListener(name,fn){(events[name]??=[]).push(fn)},requestAnimationFrame(){},setTimeout(){},clearTimeout(){},confirm:()=>false,location:{reload(){}},console,Math,Date});
+const ctx=vm.createContext({...rules,...hero,...life,...uiIcons,...navigation,THREE:{...THREE,WebGLRenderer:class{constructor(){this.shadowMap={};this.domElement={setAttribute(){},focus(){},setPointerCapture(){},getBoundingClientRect(){return {left:0,top:0,width:1280,height:720}}}}setPixelRatio(){}setSize(){}render(){}}},AudioContext:FakeAudio,document:{querySelector:node,querySelectorAll:()=>[],body:node('body'),activeElement:{tagName:'BODY'},addEventListener(){},hidden:false},innerWidth:1280,innerHeight:720,devicePixelRatio:1,localStorage:{getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v)},addEventListener(name,fn){(events[name]??=[]).push(fn)},requestAnimationFrame(){},setTimeout(){},clearTimeout(){},confirm:()=>false,location:{reload(){}},console,Math,Date});
 const source=fs.readFileSync(new URL('./dist/game.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');vm.runInContext(source,ctx);const run=code=>vm.runInContext(code,ctx);const emit=(name,event)=>events[name].forEach(fn=>fn(event));node('#welcome').open=false;
 // Clean starts and migration preserve old islands while adding eight-stage progression.
 assert.equal(run('havenLevel(s)'),0);assert.equal(run('nextGoal().title').includes('모닥불'),true);
@@ -92,3 +93,47 @@ ctx.window={visualViewport:{width:390,height:650,offsetLeft:0,offsetTop:30}};run
 console.log('PASS: names and empty-name validation, keypad limits, action HUD, quiet snow/petals/wind, viewport offsets and mandatory bottom menu.');
 if(process.argv.includes('--fixture'))fs.writeFileSync('/private/tmp/island-qa-fixture.json',JSON.stringify({...saved,time:10*50,weather:'clear',weatherLeft:150,gold:120,wood:100,stone:80,food:80,audioOn:false,started:true,characterChosen:true}));
 console.log('PASS: delayed one-item collection/cancel/no duplicate; eight-stage reachable progression; legacy migration; direct-click construction; currency-only boats; trade validation; rod/wait/bite/reel/cancel; catch tiers; decor/resident use; friendship one-time gifts; optional events; daily beach; evening rewards; orbit/pinch/rotated joystick; particles cleanup; audio/weather/peaceful sailing/save.');
+
+// Terrain matches rendered vertices, navigation and all grounded actors.
+assert.equal(navigation.terrainElevation(0,3),0);
+assert.equal(navigation.terrainElevation(18,-3),0);
+assert.ok(navigation.terrainElevation(32,-7)>2.5);
+assert.ok(navigation.terrainElevation(0,-33)>1.5);
+for(let x=19;x<42;x+=.2)assert.ok(Math.abs(navigation.terrainElevation(x+.2,-7)-navigation.terrainElevation(x,-7))<.14);
+const land=navigation.createLandGeometry(26,-6,17*.94,(a,r)=>r*(1+.075*Math.sin(a*3+.6)+.045*Math.sin(a*5-1)));
+const positions=land.attributes.position,topCount=1+Math.ceil(17*.94*2)*96;
+for(let i=0;i<topCount;i+=17){assert.ok(Math.abs(positions.getY(i)-.1-navigation.terrainElevation(26+positions.getX(i),-6+positions.getZ(i)))<1e-5);}
+assert.ok(Array.from(land.attributes.normal.array).every(Number.isFinite));land.dispose();
+run('closeDialogue();cancelMove();standUp();sea=false;focusPoint=null;s.buildings.haven=8;player.position.set(32,0,-7);update(.016)');
+assert.ok(Math.abs(run('player.position.y')-navigation.actorHeight(32,-7))<1e-9);
+const route=run('landPath(player.position,new THREE.Vector3(30,0,-7))');assert.ok(route);assert.ok(Math.abs(route.at(-1).y-navigation.actorHeight(30,-7))<1e-9);
+run('const hillRock=rock(32,-7);globalThis.hillResource=resources.at(-1);hillResource.max=5;hillResource.remaining=5;syncResources();updateGrounding();updateGrounding()');
+assert.ok(Math.abs(run('hillResource.g.position.y')-(.4+navigation.terrainElevation(32,-7)))<1e-9);
+const hillStoneBefore=run('s.stone');
+run('player.position.set(hillResource.x,actorHeight(hillResource.x,hillResource.z),hillResource.z);hillResource.cool=0;collectResource(hillResource);updateWork(3.1)');assert.equal(run('workTask'),null);assert.ok(run('s.stone')>hillStoneBefore);
+// Ground clicks hit the rendered hill rather than the old y=.4 plane.
+run('scene.updateMatrixWorld(true);clickRay.set(new THREE.Vector3(32,20,-7),new THREE.Vector3(0,-1,0))');
+assert.ok(Math.abs(run('groundPoint().y')-(.38+navigation.terrainElevation(32,-7)))<.04);
+run('s.buildings.haven=0');assert.equal(run('terrainRoots().length'),1);run('s.buildings.haven=8');assert.equal(run('terrainRoots().length'),5);
+// Camera stays in front of walls, ignores hidden/translucent objects and clears near-plane corners.
+const avoid=navigation.createCameraAvoidance(),center=new THREE.Vector3(0,1.5,0),wanted=new THREE.Vector3(0,1.5,10);
+const obstacle=new THREE.Mesh(new THREE.BoxGeometry(4,4,1),new THREE.MeshBasicMaterial());obstacle.position.set(0,1.5,5);obstacle.updateMatrixWorld(true);
+assert.ok(avoid(center,wanted,[obstacle]).z<4.2);
+obstacle.visible=false;assert.equal(avoid(center,wanted,[obstacle]).z,10);obstacle.visible=true;
+obstacle.material.transparent=true;obstacle.material.opacity=.22;assert.equal(avoid(center,wanted,[obstacle]).z,10);obstacle.material.opacity=1;
+obstacle.position.set(2.2,1.5,5);obstacle.updateMatrixWorld(true);assert.ok(avoid(center,wanted,[obstacle]).z<4.2);
+obstacle.position.set(0,1.5,15);obstacle.updateMatrixWorld(true);assert.equal(avoid(center,wanted,[obstacle]).z,10);
+run('player.position.set(32,actorHeight(32,-7),-7);yaw=.65;pitch=.12;zoom=25;updateCamera(.1)');
+assert.ok(run('camera.position.y')>run('terrainElevation(camera.position.x,camera.position.z)+.38'));
+assert.ok(run('camera.position.toArray().every(Number.isFinite)'));
+obstacle.geometry.dispose();obstacle.material.dispose();
+console.log('PASS: visible hill geometry, slope continuity, actor/resource grounding without drift, hill gathering and path height, terrain clicks, region gates, wall/corner/hidden camera collisions and terrain clearance.');
+
+run('const hillHouse=new THREE.Group();hillHouse.position.set(32,0,-7);groundBuilding(hillHouse,"house",{x:32,z:-7});globalThis.testHillHouse=hillHouse;groundRoot(hillHouse);groundRoot(hillHouse)');
+assert.ok(run('testHillHouse.position.y')>=navigation.terrainElevation(32,-7));assert.ok(run('testHillHouse.children.some(o=>o.userData.foundation)'));
+run('snapshotNodes();initializeNodes();syncResources()');assert.ok(run('resources.some(r=>r.x===32&&r.z===-7)'));
+console.log('PASS: hill foundations and saved deposits in unlocked expansion regions survive restoration.');
+run('globalThis.cameraTestWall=new THREE.Mesh(new THREE.BoxGeometry(4,4,1),new THREE.MeshBasicMaterial());cameraTestWall.position.set(70,2,66);scene.add(cameraTestWall);buildingGroups.set("qa-camera-wall",cameraTestWall);sea=false;focusPoint=null;player.position.set(70,.45,70);yaw=Math.PI;pitch=.18;zoom=12;camera.position.set(70,10,90);updateCamera(.1)');
+assert.ok(run('camera.position.distanceTo(cameraCenter)')>=5);assert.ok(run('camera.position.y')>3);
+run('buildingGroups.delete("qa-camera-wall");scene.remove(cameraTestWall);cameraTestWall.geometry.dispose();cameraTestWall.material.dispose()');
+console.log('PASS: a close blocked camera raises its angle to preserve a comfortable character view.');

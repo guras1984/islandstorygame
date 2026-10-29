@@ -28,3 +28,11 @@
 - 모든 신규 건물 미리보기의 세부 외형 완전 일치 (주요 시설·기존 이동 모델은 적용, 일부 특수 시설은 간소화).
 - 실제 기기 장시간 밸런스·발열 측정, 지속 플레이에 따른 수치 조정.
 - 계정·서버 시각 검증·친구 방문·Roblox 이전은 기존 결정대로 추후.
+
+## v18 — Terrain and camera navigation
+
+- `dist/navigation.js` owns original compact-support hills, a gridded grass surface, consistent actor heights, and a five-ray camera envelope. The main settlement stays level. No Marble Blast code or assets are incorporated.
+- Open region terrain, visible resources, building roots and the notice board obstruct the camera. Locked regions, hidden descendants and translucent meshes do not. A blocked close view first seeks a higher angle; inward motion is immediate and outward recovery is damped. The interpolated camera path is swept again.
+- Ground clicks raycast rendered land. Player, residents, animals, resources, nature, decor, markers and building foundations use the same height function. Sea movement continues to use its water plane.
+- Existing progression/save schema is retained. Resource restoration now accepts unlocked expansion land rather than discarding every deposit outside the original radius.
+- Automated verification covers terrain vertices, gradients, grounding drift, gathering on a hill, route endpoints, terrain ray hits, locked regions, camera wall/corner/hidden/translucent cases, foundation support and expanded deposit restoration. Browser QA uses a temporary copy and a separate save key, not the player's save.

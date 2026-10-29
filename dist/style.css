@@ -74,3 +74,43 @@ footer{background:transparent;pointer-events:none;border:0;height:35px;padding:0
 .nav-rail button span svg{display:block;width:32px;height:32px;margin:auto}.nav-rail button,body.mobile-landscape .nav-rail button{width:56px;min-height:60px;font-size:9px}.nav-rail,body.mobile-landscape .nav-rail{padding:5px 9px;background:#fffbea9e;backdrop-filter:blur(4px);border-color:#fffc}.panel,body.mobile-landscape .panel{bottom:88px;top:auto;width:min(470px,calc(100% - 170px));max-height:none;overflow:visible;background:#fffbea8c;border:1px solid #fffd;border-radius:23px;box-shadow:0 4px 20px #34553115;backdrop-filter:blur(4px)}.panel-heading{display:none!important}#panelContent,body.mobile-landscape #panelContent{padding:7px 35px 7px 7px;overflow:hidden}.tile-slider{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;touch-action:pan-x}.tile-slider::-webkit-scrollbar{display:none}.menu-tile{flex:0 0 87px;scroll-snap-align:start;min-height:91px;padding:6px 4px;background:#fffdf47a;border-radius:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.menu-tile:hover{background:#fffdf4bb;transform:none}.tile-picture{position:relative;display:block;width:47px;height:47px}.tile-picture svg{width:100%;height:100%}.tile-picture i{position:absolute;right:-2px;bottom:0;font-size:11px;font-style:normal}.tile-name{font-size:10px;color:#35553e;line-height:1.4;word-break:keep-all;text-align:center}.slider-next{position:absolute;right:3px;top:14px;bottom:14px;width:28px;padding:0;font-size:27px;background:#fffbee9c;border-radius:14px}.panel:not([hidden]){animation:dock-rise .2s ease-out}@keyframes dock-rise{from{opacity:0;translate:0 7px}to{opacity:1;translate:0 0}}
 .detail-dialog{background:#fffbeaC9!important;border:1px solid #fff9;backdrop-filter:blur(5px)}body.event-message #conversation,body.mobile-landscape.event-message #conversation{top:50%;bottom:auto;transform:translate(-50%,-50%);width:min(510px,calc(100% - 180px));background:#fffbedc9;border-radius:30px;padding:18px 23px}.conversation-top{gap:12px}#dialogueSkip,body.mobile-landscape #dialogueSkip{font-size:13px;min-height:46px;padding:10px 16px;border-radius:16px;background:#eee6cead;color:#5b6d48}#dialogueNext,body.mobile-landscape #dialogueNext{font-size:14px;min-height:48px;min-width:105px;padding:10px 22px;border-radius:17px;background:#739954;color:white}#dialogueText,body.mobile-landscape #dialogueText{font-size:13px;line-height:1.8;min-height:48px;max-height:80px}#skillFeedback{position:absolute;left:50%;top:65px;transform:translateX(-50%);z-index:12;background:#f8f5dfc9;border:1px solid #fff9;border-radius:15px;padding:7px 13px;font-size:10px;color:#4d744a;pointer-events:none}.skill-card{padding:15px;background:#f2f1dcb3;border-radius:17px;margin:10px 0}.skill-card small{display:block;font-size:11px;color:#748265;margin:7px 0}.skill-card .action-track i{background:#91ad69}.quest,body.mobile-landscape .quest{background:#fffbed9e}#toast,body.mobile-landscape #toast{background:#fffbedba}
 body .nav-rail button,body.mobile-landscape .nav-rail button{color:#35553e}body .nav-rail button.active{color:#35553e;background:#dce8c3a8}
+/* Compact landscape HUD: one shallow tray and one replaceable detail sheet. */
+body.mobile-landscape .brand,body.mobile-landscape #sound,body.mobile-landscape #help,body.mobile-landscape footer .controls{display:none!important}
+body.mobile-landscape .nav-rail{bottom:7px;padding:2px 5px;border-radius:16px}
+body.mobile-landscape .nav-rail button{width:45px;min-height:44px;padding:2px;font-size:8px;position:relative}
+body.mobile-landscape .nav-rail button span svg{width:25px;height:25px}
+body.mobile-landscape .panel{bottom:61px;width:min(380px,calc(100% - 110px));border-radius:16px}
+body.mobile-landscape #panelContent{padding:4px 29px 4px 4px}
+body.mobile-landscape .menu-tile{flex-basis:65px;min-height:61px;padding:3px;border-radius:11px}
+body.mobile-landscape .tile-picture{width:32px;height:32px}
+body.mobile-landscape .tile-name{font-size:9px}
+body.mobile-landscape #resources{width:268px;min-height:32px;padding:4px 7px}
+body.mobile-landscape .res{padding:0 5px;gap:3px}body.mobile-landscape .res .icon{font-size:15px}
+body.mobile-landscape .top-actions button{min-width:44px;min-height:44px;background:#fffbea96}
+body.mobile-landscape .detail-dialog{width:350px;padding:10px 13px;font-size:11px;max-height:calc(100dvh - 125px);border-radius:18px;background:#fffbeacb!important}
+body.mobile-landscape .detail-dialog h2{font-size:13px;margin:0}.detail-heading{gap:8px}
+body.mobile-landscape .detail-dialog p{font-size:11px;line-height:1.6;margin:7px 0}
+body.mobile-landscape .detail-dialog .life-grid{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x proximity}
+body.mobile-landscape .detail-dialog .life-grid>button,body.mobile-landscape .detail-dialog .life-grid>article{flex:0 0 100px;min-height:52px;padding:8px;font-size:11px}
+body.mobile-landscape .detail-dialog .life-grid small{font-size:9px}
+body.mobile-landscape #detailActions{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+body.mobile-landscape #detailActions button{min-height:44px;padding:7px 10px;font-size:11px}
+body.mobile-landscape .detail-dialog .detail-heading #closeDetail{min-height:44px;min-width:44px;padding:3px}
+body.mobile-landscape:not(.portrait-game) #detailDialog[open]{position:fixed;inset:auto;left:50%;top:auto;bottom:64px;margin:0;transform:translateX(-50%);max-height:calc(100dvh - 125px)}
+body.portrait-game #detailDialog[open]{left:calc(100dvw - 64px);top:50%;transform:translate(-100%,-50%) rotate(90deg);transform-origin:right center;max-height:calc(100dvw - 125px);max-width:calc(100dvh - 110px)}
+body.mobile-landscape .detail-dialog::backdrop{background:#234b3520}
+body.mobile-landscape #placementBar{bottom:65px;width:min(420px,calc(100% - 100px));padding:7px 10px}
+body.mobile-landscape #conversation{bottom:65px}body.mobile-landscape #restControl,body.mobile-landscape .fishing-controls{bottom:65px}
+body.mobile-landscape #save{font-size:8px;opacity:.65}#detailBody details summary{cursor:pointer;min-height:36px;display:flex;align-items:center;color:#4c6946;font-size:11px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* Non-modal sheet inherits the game's rotation; never rotate it a second time. */
+body #detailDialog[open],body.mobile-landscape #detailDialog[open],body.portrait-game #detailDialog[open]{position:absolute;inset:auto;left:50%;top:auto;right:auto;bottom:85px;margin:0;transform:translateX(-50%);transform-origin:center;z-index:35;width:370px;max-width:calc(100% - 40px);max-height:calc(var(--game-height,100dvh) - 145px);overflow:auto;}
+body.mobile-landscape #detailDialog[open]{bottom:61px;width:350px;max-height:calc(var(--game-height,100dvh) - 115px)}
+body.mobile-landscape .detail-dialog .decor-picker>button{flex-basis:62px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;padding:4px}
+.decor-picker>button span{font-size:25px}.decor-picker>button b{font-size:10px;font-weight:500}
+body.reduced-motion *,body.reduced-motion *::before{animation:none!important;transition:none!important}
+body.mobile-landscape #detailActions button{width:auto;flex:0 1 auto;margin:0;min-width:44px}
+body.mobile-landscape .detail-dialog,body.mobile-landscape .nav-rail,body.mobile-landscape .panel,body.mobile-landscape #resources,body.mobile-landscape #toast,body.mobile-landscape .quest{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.mobile-landscape #detailBody{overflow:visible}body.mobile-landscape #detailActions{flex-direction:row}
+body.mobile-landscape #touchGuide{display:none!important}

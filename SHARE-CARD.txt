@@ -1,0 +1,11 @@
+아일토피아 공유 카드 제작 기록
+방식: built-in image_gen (CLI/API fallback 미사용)
+용도: KakaoTalk 및 SNS Open Graph 대표 이미지. 실제 게임 화면이 아닌 홍보용 일러스트입니다.
+배포 이미지: dist/assets/isletopia-share-v1.jpg (1200×630)
+입력: 사용자가 제공한 캐릭터 참고 이미지. 원본 사진은 GitHub에 게시하지 않습니다.
+최종 프롬프트:
+Use case: ads-marketing. Asset: landscape social link preview key art for an original Korean cozy 3D browser game, aspect ratio approximately 1.91:1 (1536 x 800). A finished polished promotional illustration, not a gameplay screenshot.
+Input reference image: use ONLY the toy character on the RIGHT as an identity/design reference, and the yellow X on the LEFT drawing as the chest emblem. Do not reproduce the photographed drawing sheet, table, crayons, labels, names or comparison layout.
+Scene: one rounded grassy little island in a calm turquoise sea, sandy coastline, a few modest cream cottages with muted terracotta and sage roofs, round green trees, fruit trees, small pond, wooden pier with one small sailboat, a white rabbit and gentle little deer. Warm sunny spring atmosphere. Simple friendly rounded-box low-poly toy-game art, matte surfaces and soft shadows, visually believable for a small 3D browser game, not realistic or a giant fantasy city.
+Foreground hero on RIGHT: warm peach rounded rectangular head, little dark eyes and friendly curved smile, teal rectangular tunic with a clear yellow X emblem, short jointed arms/legs, orange cuffs and shoes, uneven three-point golden crown, tiny striped party cone beside crown, small blue wings with yellow stripes. Keep the character recognizable and prominent, welcoming the viewer. The island village fills the right and lower portions behind him; all important subjects inside a 7% safe margin.
+LEFT upper/middle: beautifully typeset very large bold rounded Korean game title exactly "아일토피아" (아 일 토 피 아), dark deep forest green with subtle cream dimensional edging. Under it smaller elegant letterspaced "ISLETOPIA". A short readable Korean line underneath exactly "작은 섬에서 시작되는 나만의 세상". Give the typography clear light mint/cream negative space. The title and hero should be legible at tiny KakaoTalk preview size. Restrained, premium, charming, inviting. No other text, no buttons, no UI, no logos of existing games, no watermark.

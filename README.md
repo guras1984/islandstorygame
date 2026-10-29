@@ -1,4 +1,4 @@
-# 섬이야기 (islandstorygame)
+# 아일토피아 · ISLETOPIA (islandstorygame)
 
 모바일 플레이: https://guras1984.github.io/islandstorygame/
 
@@ -55,3 +55,11 @@ Three.js 0.170.0은 로컬 vendor로 포함(MIT). Google Fonts는 선택적 온�
 ## GitHub Pages
 
 main 브랜치의 루트에서 정적으로 서비스합니다. 루트 index.html은 dist/index.html과 같고 스타일·스크립트 경로만 dist/를 가리킵니다. 화면 소스 수정 후 두 진입 파일을 함께 동기화하세요. Sites용 .openai 설정은 GitHub 배포에서 제외합니다.
+
+
+## 링크 공유
+
+게임 이름은 아일토피아로 변경했으며 기존 islandstorygame 주소와 브라우저 저장 키는 유지합니다. 루트와 dist 진입점에 OG/Twitter 제목·소개·1200×630 JPEG 공유 이미지를 지정했습니다. dist/assets/isletopia-share-v1.jpg는 홍보용 생성 일러스트이며 실제 게임 화면 캡처가 아닙니다. 카카오톡의 기존 미리보기는 URL 메타정보 관리 도구에서 캐시를 초기화한 뒤 재공유해야 갱신될 수 있습니다. 제작 프롬프트는 SHARE-CARD.txt에 기록했습니다.
+
+새 공유 주소: https://guras1984.github.io/islandstorygame/isletopia.html
+이 주소는 같은 게임을 직접 실행하며 동일한 저장 데이터를 사용합니다. 새 URL로 기존 공유 캐시와 구분할 수 있도록 자기 자신의 canonical/og:url을 사용합니다. 루트·dist·isletopia.html 세 진입점의 본문은 함께 동기화합니다.
